@@ -1,8 +1,0 @@
-UnityEngine.MissingReferenceException: The object of type 'UnityEngine.RectTransform' has been destroyed but you are still trying to access it.
-Your script should either check if it is null or you should not destroy the object.
-  at UnityEngine.Object+MarshalledUnityObject.TryThrowEditorNullExceptionObject (UnityEngine.Object unityObj, System.String parameterName) [0x00065] in <ad78ec25e30a41adb27f06b0ae6b00c9>:0 
-  at UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) [0x0000a] in <ad78ec25e30a41adb27f06b0ae6b00c9>:0 
-  at UnityEngine.Object.GetName () [0x00006] in <ad78ec25e30a41adb27f06b0ae6b00c9>:0 
-  at UnityEngine.Object.get_name () [0x00000] in <ad78ec25e30a41adb27f06b0ae6b00c9>:0 
-  at ConsoleButtonOutlines.Configure (UnityEngine.Transform root) [0x00010] in C:\Users\googo\OneDrive\文件\UIUC\CS417\MP1a\TheRoom\Assets\TheRoom\Editor\ConsoleButtonOutlines.cs:29 
-  at ConsoleButtonOutlines.Apply () [0x0009f] in C:\Users\googo\OneDrive\文件\UIUC\CS417\MP1a\TheRoom\Assets\TheRoom\Editor\ConsoleButtonOutlines.cs:17 

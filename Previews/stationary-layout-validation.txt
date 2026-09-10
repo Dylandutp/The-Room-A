@@ -1,1 +1,0 @@
-PASS: 12 x 5 m board; 8 m menu attached to board; classroom start centered at z=-2.5; nature panel near arrival. No movement or interaction scripts added.

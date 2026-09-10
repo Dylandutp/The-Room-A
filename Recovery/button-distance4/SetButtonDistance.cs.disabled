@@ -1,9 +1,0 @@
-using System;using System.IO;using System.Linq;using UnityEngine;using UnityEngine.SceneManagement;using UnityEditor;using UnityEditor.SceneManagement;
-public static class SetButtonDistance{
- [InitializeOnLoadMethod]static void Init(){if(File.Exists("Recovery/button-distance4/request"))EditorApplication.delayCall+=Run;}
- static void Run(){if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Run;return;}if(!File.Exists("Recovery/button-distance4/request"))return;File.Move("Recovery/button-distance4/request","Recovery/button-distance4/running");try{
- var s=SceneManager.GetActiveScene();if(s.path!="Assets/TheRoom/Scenes/TheRoom.unity")throw new Exception("Unexpected active scene");if(!EditorSceneManager.SaveScene(s,"Recovery/button-distance4/LiveBefore.unity",true))throw new Exception("Backup failed");
- var sources=s.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<AudioSource>(true)).Where(a=>a.name=="ClickFeedback").ToArray();if(sources.Length!=10)throw new Exception("Unexpected count: "+sources.Length);
- foreach(var a in sources){a.minDistance=4;EditorUtility.SetDirty(a);PrefabUtility.RecordPrefabInstancePropertyModifications(a);}EditorSceneManager.MarkSceneDirty(s);if(!EditorSceneManager.SaveScene(s))throw new Exception("Save failed");File.WriteAllText("Recovery/button-distance4/success.txt","10 ClickFeedback audio sources set to MinDistance 4 and saved.");
- }catch(Exception e){File.WriteAllText("Recovery/button-distance4/error.txt",e.ToString());}}
-}

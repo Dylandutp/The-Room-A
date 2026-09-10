@@ -1,2 +1,0 @@
-Removed orbit visuals: 2
-Celestial bodies and transforms preserved. No runtime rotation script added.

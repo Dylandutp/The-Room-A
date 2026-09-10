@@ -1,5 +1,0 @@
-PASS: West WallMaterial1 tile + normal, tiling 8x8, metallic .15, smoothness .25
-PASS: East WallMaterial2 tile + normal, tiling 4x4, metallic .65, smoothness .75
-PASS: North WallMaterial3 flat pale blue-white, no textures
-PASS: Skybox/6 Sided, six supplied sky13 textures
-PASS: Normal texture imported as NormalMap. No runtime scripts added.

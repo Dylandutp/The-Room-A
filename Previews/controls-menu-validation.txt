@@ -1,1 +1,0 @@
-PASS: Controls_Menu_Canvas WorldSpace, 1000x1000, scale .002. TMP labels A teleport / B quit. No input scripts.

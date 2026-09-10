@@ -1,3 +1,0 @@
-System.InvalidOperationException: Sequence contains no matching element
-  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source, System.Func`2[T,TResult] predicate) [0x00070] in <fe644d7ad1cf499ebe4e7ad937bc03bf>:0 
-  at RestoreSideWallMaterials.Run () [0x000a6] in C:\Users\googo\OneDrive\文件\UIUC\CS417\MP1a\TheRoom\Assets\TheRoom\Editor\RestoreSideWallMaterials.cs:7 

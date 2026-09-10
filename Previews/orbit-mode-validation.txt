@@ -1,1 +1,0 @@
-PASS: controller shooter references preserved; Planet assigned; mode Button persistent listener bound; mode text toggles both ways; tangent and radial-aim fallback tests pass; Bullet prefab non-static.
