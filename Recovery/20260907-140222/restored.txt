@@ -1,0 +1,1 @@
+Restored exact ExistingRecovery.unity snapshot. Comet component and Planet reference verified; Static disabled; no missing scripts. Previous live scene saved in Assets/_Recovery/BeforeRestore.unity.

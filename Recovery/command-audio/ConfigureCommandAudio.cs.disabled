@@ -1,0 +1,35 @@
+using System;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+public static class ConfigureCommandAudio
+{
+ const string D="Recovery/command-audio/";
+ [InitializeOnLoadMethod] static void Init(){if(File.Exists(D+"request"))EditorApplication.delayCall+=Run;}
+ static void Run(){
+ if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Run;return;}
+ if(!File.Exists(D+"request"))return;File.Move(D+"request",D+"running");
+ try{
+ var scene=SceneManager.GetActiveScene();if(scene.path!="Assets/TheRoom/Scenes/TheRoom.unity")throw new Exception("Unexpected active scene");
+ if(!EditorSceneManager.SaveScene(scene,D+"LiveBefore.unity",true))throw new Exception("Backup failed");
+ var roots=scene.GetRootGameObjects();
+ var camera=roots.SelectMany(r=>r.GetComponentsInChildren<CameraControl>(true)).Single(c=>c.xrOrigin!=null);
+ var light=roots.SelectMany(r=>r.GetComponentsInChildren<LightControl>(true)).Single(c=>c.lightAction!=null);
+ var quit=roots.SelectMany(r=>r.GetComponentsInChildren<Quit>(true)).Single(c=>c.action!=null);
+ var head=camera.xrOrigin.GetComponentInChildren<Camera>(true);if(head==null)throw new Exception("XR camera missing");
+ if(head.transform.Find("CommandAudio")!=null)throw new Exception("Already configured");
+ var clip=AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/TheRoom/Resources/Feedback/Click.ogg");if(clip==null)throw new Exception("Audio missing");
+ var group=new GameObject("CommandAudio");group.transform.SetParent(head.transform,false);group.transform.localPosition=new Vector3(0,-.15f,.25f);
+ light.commandAudio=Make(group.transform,"LightSwitch",clip,1.2f);
+ camera.commandAudio=Make(group.transform,"Teleport",clip,.9f);
+ quit.commandAudio=Make(group.transform,"Quit",clip,.65f);
+ foreach(var c in new Component[]{light,camera,quit}){EditorUtility.SetDirty(c);PrefabUtility.RecordPrefabInstancePropertyModifications(c);}
+ EditorSceneManager.MarkSceneDirty(scene);if(!EditorSceneManager.SaveScene(scene))throw new Exception("Save failed");
+ File.WriteAllText(D+"success.txt","Three preconfigured 3D AudioSources assigned under XR camera/CommandAudio. Clip duration="+clip.length+"; Quit waits for playback. Scene saved.");
+ }catch(Exception e){File.WriteAllText(D+"error.txt",e.ToString());Debug.LogException(e);}
+ }
+ static AudioSource Make(Transform parent,string name,AudioClip clip,float pitch){var g=new GameObject(name);g.transform.SetParent(parent,false);var a=g.AddComponent<AudioSource>();a.clip=clip;a.playOnAwake=false;a.loop=false;a.spatialBlend=1;a.volume=.4f;a.pitch=pitch;a.dopplerLevel=0;a.minDistance=1;a.maxDistance=5;return a;}
+}

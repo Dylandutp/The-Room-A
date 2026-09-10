@@ -1,0 +1,4 @@
+System.Exception: Raycast missed EquipmentButton
+  at RepairRoomUI.Validate (UnityEngine.SceneManagement.Scene scene) [0x00337] in C:\Users\googo\OneDrive\文件\UIUC\CS417\MP1a\TheRoom\Assets\TheRoom\Editor\RepairRoomUI.cs:221 
+  at RepairRoomUI.Repair () [0x000e8] in C:\Users\googo\OneDrive\文件\UIUC\CS417\MP1a\TheRoom\Assets\TheRoom\Editor\RepairRoomUI.cs:49 
+  at RepairRoomUI.ApplyPending () [0x00052] in C:\Users\googo\OneDrive\文件\UIUC\CS417\MP1a\TheRoom\Assets\TheRoom\Editor\RepairRoomUI.cs:27 

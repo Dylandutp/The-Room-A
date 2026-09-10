@@ -1,0 +1,1 @@
+24 particles/burst; size .055-.095; lifetime .3-.45; speed .8-1.4; cone 28 degrees. Simulation count=24. Saved.

@@ -1,0 +1,38 @@
+using System;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+public static class BakeShotFeedback
+{
+ const string Dir="Recovery/native-shot/";
+ [InitializeOnLoadMethod] static void Init(){if(File.Exists(Dir+"request"))EditorApplication.delayCall+=Run;}
+ static void Run(){
+ if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Run;return;}
+ if(!File.Exists(Dir+"request"))return;File.Move(Dir+"request",Dir+"running");
+ try{
+ var scene=SceneManager.GetActiveScene();
+ if(scene.path!="Assets/TheRoom/Scenes/TheRoom.unity")throw new Exception("Unexpected active scene; untouched");
+ if(!EditorSceneManager.SaveScene(scene,Dir+"LiveBefore.unity",true))throw new Exception("Backup failed");
+ var shooter=scene.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<GenerateBullet>(true)).Single(s=>s.initPos!=null&&s.bulletPrefab!=null&&s.planet!=null);
+ if(shooter.initPos.Find("ShotFeedback")!=null)throw new Exception("Already configured");
+ var mat=AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/ParticlesUnlit.mat");
+ var clip=AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/TheRoom/Resources/Feedback/Shot.ogg");
+ if(mat==null||clip==null)throw new Exception("Missing assets");
+ var g=new GameObject("ShotFeedback");g.transform.SetParent(shooter.initPos,false);
+ var ps=g.AddComponent<ParticleSystem>();ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+ var main=ps.main;main.playOnAwake=false;main.loop=false;main.duration=.15f;main.startLifetime=.15f;main.startSpeed=.7f;main.startSize=.025f;main.startColor=new Color(.4f,.85f,1f,1);main.maxParticles=32;main.simulationSpace=ParticleSystemSimulationSpace.World;main.scalingMode=ParticleSystemScalingMode.Local;
+ var emission=ps.emission;emission.rateOverTime=0;emission.SetBursts(new[]{new ParticleSystem.Burst(0,8)});
+ var shape=ps.shape;shape.shapeType=ParticleSystemShapeType.Cone;shape.angle=12;shape.radius=.015f;
+ var color=ps.colorOverLifetime;color.enabled=true;var grad=new Gradient();grad.SetKeys(new[]{new GradientColorKey(Color.white,0),new GradientColorKey(Color.white,1)},new[]{new GradientAlphaKey(1,0),new GradientAlphaKey(0,1)});color.color=grad;
+ var renderer=ps.GetComponent<ParticleSystemRenderer>();renderer.sharedMaterial=mat;renderer.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
+ var audio=g.AddComponent<AudioSource>();audio.playOnAwake=false;audio.clip=clip;audio.spatialBlend=1;audio.dopplerLevel=0;audio.volume=.3f;audio.minDistance=1;audio.maxDistance=18;audio.rolloffMode=AudioRolloffMode.Logarithmic;
+ shooter.shotParticles=ps;shooter.shotAudio=audio;EditorUtility.SetDirty(shooter);PrefabUtility.RecordPrefabInstancePropertyModifications(shooter);
+ ps.Simulate(.05f,true,true);if(ps.particleCount==0)throw new Exception("Particle test failed");ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+ EditorSceneManager.MarkSceneDirty(scene);if(!EditorSceneManager.SaveScene(scene))throw new Exception("Save failed");
+ File.WriteAllText(Dir+"success.txt","Saved ShotFeedback under "+shooter.initPos.name+"; assigned ParticleSystem and 3D AudioSource on "+shooter.name+"; particle simulation passed.");
+ }catch(Exception e){File.WriteAllText(Dir+"error.txt",e.ToString());Debug.LogException(e);}
+ }
+}

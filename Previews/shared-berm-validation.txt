@@ -1,0 +1,2 @@
+Berm objects sharing 011_Berm.asset: 24
+Transforms and materials preserved.

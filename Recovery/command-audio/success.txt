@@ -1,0 +1,1 @@
+Three preconfigured 3D AudioSources assigned under XR camera/CommandAudio. Clip duration=0.1000227; Quit waits for playback. Scene saved.

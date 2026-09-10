@@ -1,0 +1,10 @@
+using System;using System.IO;using System.Linq;using System.Text;using UnityEngine;using UnityEngine.UI;using UnityEngine.SceneManagement;using UnityEditor;
+public static class ReviewInteractions{
+ [InitializeOnLoadMethod]static void Init(){if(File.Exists("Recovery/interaction-review/request"))EditorApplication.delayCall+=Run;}
+ static string Path(Transform t){return t.parent==null?t.name:Path(t.parent)+"/"+t.name;}
+ static void Run(){if(EditorApplication.isCompiling||EditorApplication.isUpdating){EditorApplication.delayCall+=Run;return;}if(!File.Exists("Recovery/interaction-review/request"))return;File.Delete("Recovery/interaction-review/request");var sb=new StringBuilder();foreach(var r in SceneManager.GetActiveScene().GetRootGameObjects()){
+ foreach(var b in r.GetComponentsInChildren<Button>(true)){sb.AppendLine("BUTTON "+Path(b.transform));for(int i=0;i<b.onClick.GetPersistentEventCount();i++){var t=b.onClick.GetPersistentTarget(i);sb.AppendLine("  "+(t==null?"NULL":t.name+" "+t.GetType().Name)+"."+b.onClick.GetPersistentMethodName(i)+" "+b.onClick.GetPersistentListenerState(i));}}
+ foreach(var g in r.GetComponentsInChildren<GenerateBullet>(true))sb.AppendLine("SHOOTER "+Path(g.transform)+" active="+g.isActiveAndEnabled+" muzzle="+(g.initPos==null?"NULL":Path(g.initPos))+" audio="+(g.shotAudio==null?"NULL":Path(g.shotAudio.transform)+" active="+g.shotAudio.isActiveAndEnabled+" pos="+g.shotAudio.transform.position+" clip="+g.shotAudio.clip));
+ foreach(var a in r.GetComponentsInChildren<AudioListener>(true))sb.AppendLine("LISTENER "+Path(a.transform)+" active="+a.isActiveAndEnabled+" pos="+a.transform.position);
+ }File.WriteAllText("Recovery/interaction-review/report.txt",sb.ToString());}
+}

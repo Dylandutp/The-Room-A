@@ -1,0 +1,9 @@
+Audio source: Kenney (CC0).
+Click.ogg: Interface Sounds / Audio/click_001.ogg
+https://kenney.nl/assets/interface-sounds
+Shot.ogg: Sci-fi Sounds / Audio/laserSmall_000.ogg
+https://kenney.nl/assets/sci-fi-sounds
+Original licenses included alongside these files.
+Button feedback is configured on each button's ClickFeedback child in TheRoom scene.
+Shot feedback is configured on Firing_Position/ShotFeedback and referenced by GenerateBullet.
+Adjust ParticleSystem and AudioSource directly in the Inspector.

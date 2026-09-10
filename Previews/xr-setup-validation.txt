@@ -1,0 +1,1 @@
+PASS: two Starter Assets XR Origin prefab instances; classroom active, nature inactive. One active camera and listener; no missing scripts. XR UI canvases: 9. Hardware tracking not tested.

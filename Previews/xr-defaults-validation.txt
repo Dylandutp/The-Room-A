@@ -1,0 +1,1 @@
+PASS: 2 XR Origin instances restored to prefab defaults. Only root position, rotation and active state retained. Existing object/camera references preserved.

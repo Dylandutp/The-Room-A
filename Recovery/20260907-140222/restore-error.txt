@@ -1,0 +1,2 @@
+System.Exception: Save recovery failed
+  at RecoverUserScene.Apply () [0x0016c] in C:\Users\googo\OneDrive\文件\UIUC\CS417\MP1a\TheRoom\Assets\TheRoom\Editor\RecoverUserScene.cs:23 

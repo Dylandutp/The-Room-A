@@ -1,0 +1,38 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+public static class RecoverUserScene
+{
+ const string R="Recovery/20260907-140222/";
+ [InitializeOnLoadMethod] static void Init(){if(File.Exists(R+"restore2.request"))EditorApplication.delayCall+=Apply;}
+ static void Apply(){
+ if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Apply;return;}
+ if(!File.Exists(R+"restore2.request"))return;File.Move(R+"restore2.request",R+"restore2.running");
+ try{
+ var current=SceneManager.GetSceneByPath("Assets/TheRoom/Scenes/TheRoom.unity");
+ if(current.IsValid()&&current.isLoaded&&!EditorSceneManager.SaveScene(current,"Assets/_Recovery/BeforeRestore.unity",true))throw new Exception("Cannot preserve current editor scene");
+ var recovered=SceneManager.GetSceneByPath("Assets/_Recovery/0.unity");
+ if(!recovered.IsValid()||!recovered.isLoaded)recovered=EditorSceneManager.OpenScene("Assets/_Recovery/0.unity",OpenSceneMode.Additive);
+ Validate(recovered);
+ if(current.IsValid()&&current.isLoaded)EditorSceneManager.CloseScene(current,true);
+ File.Copy(R+"ExistingRecovery.unity","Assets/TheRoom/Scenes/TheRoom.unity",true);
+ AssetDatabase.ImportAsset("Assets/TheRoom/Scenes/TheRoom.unity",ImportAssetOptions.ForceUpdate);
+ var restored=EditorSceneManager.OpenScene("Assets/TheRoom/Scenes/TheRoom.unity",OpenSceneMode.Additive);
+ Validate(restored);SceneManager.SetActiveScene(restored);
+ EditorSceneManager.CloseScene(recovered,true);
+ File.WriteAllText(R+"restored.txt","Restored exact ExistingRecovery.unity snapshot. Comet component and Planet reference verified; Static disabled; no missing scripts. Previous live scene saved in Assets/_Recovery/BeforeRestore.unity.");
+ File.Move(R+"restore2.running",R+"restore2.done");
+ }catch(Exception e){File.WriteAllText(R+"restore2-error.txt",e.ToString());Debug.LogException(e);}
+ }
+ static void Validate(Scene scene){
+ Comet comet=null;int missing=0;
+ foreach(var root in scene.GetRootGameObjects()){
+ foreach(var c in root.GetComponentsInChildren<Comet>(true))comet=c;
+ foreach(var t in root.GetComponentsInChildren<Transform>(true))missing+=GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(t.gameObject);
+ }
+ if(comet==null||comet.planet==null||comet.gameObject.isStatic||missing>0)throw new Exception("Recovery validation failed");
+ }
+}

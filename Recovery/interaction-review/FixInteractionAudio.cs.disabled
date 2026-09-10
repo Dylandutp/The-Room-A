@@ -1,0 +1,17 @@
+using System;using System.IO;using System.Linq;using UnityEditor;using UnityEditor.SceneManagement;using UnityEngine;using UnityEngine.UI;using UnityEngine.Events;using UnityEngine.SceneManagement;
+public static class FixInteractionAudio{
+ const string D="Recovery/interaction-review/";
+ [InitializeOnLoadMethod]static void Init(){if(File.Exists(D+"fix.request"))EditorApplication.delayCall+=Run;}
+ static void Run(){if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Run;return;}if(!File.Exists(D+"fix.request"))return;File.Move(D+"fix.request",D+"fix.running");try{
+ var scene=SceneManager.GetActiveScene();if(scene.path!="Assets/TheRoom/Scenes/TheRoom.unity")throw new Exception("Unexpected scene");if(!EditorSceneManager.SaveScene(scene,D+"LiveBefore.unity",true))throw new Exception("Backup failed");
+ var roots=scene.GetRootGameObjects();var shooters=roots.SelectMany(r=>r.GetComponentsInChildren<GenerateBullet>(true)).ToArray();var g=shooters.Single(s=>s.initPos!=null&&s.bulletPrefab!=null);
+ var button=roots.SelectMany(r=>r.GetComponentsInChildren<Button>(true)).Single(b=>b.name=="ShootingToggleButton");int fixedCount=0;for(int i=0;i<button.onClick.GetPersistentEventCount();i++)if(button.onClick.GetPersistentMethodName(i)=="switchMode"){button.onClick.SetPersistentListenerState(i,UnityEventCallState.RuntimeOnly);fixedCount++;}if(fixedCount!=1)throw new Exception("Unexpected assist binding");
+ var source=g.shotAudio;if(source==null||source.clip==null)throw new Exception("Shot source/clip missing");
+ var audioObject=new GameObject("ShotAudio");audioObject.transform.SetParent(g.transform,false);audioObject.transform.position=g.initPos.position;
+ var audio=audioObject.AddComponent<AudioSource>();EditorUtility.CopySerialized(source,audio);audio.enabled=true;audio.mute=false;audio.playOnAwake=false;audio.volume=.5f;audio.spatialBlend=1;audio.dopplerLevel=0;
+ g.shotAudio=audio;UnityEngine.Object.DestroyImmediate(source);
+ int empty=0;foreach(var s in shooters)if(s!=g&&s.initPos==null&&s.bulletPrefab==null&&s.inputAction==null){UnityEngine.Object.DestroyImmediate(s);empty++;}
+ EditorUtility.SetDirty(g);PrefabUtility.RecordPrefabInstancePropertyModifications(g);EditorUtility.SetDirty(button);PrefabUtility.RecordPrefabInstancePropertyModifications(button);
+ EditorSceneManager.MarkSceneDirty(scene);if(!EditorSceneManager.SaveScene(scene))throw new Exception("Save failed");File.WriteAllText(D+"fixed.txt","Assist listener enabled; shot audio precreated under Input Manager with assigned clip, enabled and unmuted. Empty shooter components removed="+empty);
+ }catch(Exception e){File.WriteAllText(D+"fix-error.txt",e.ToString());Debug.LogException(e);}}
+}

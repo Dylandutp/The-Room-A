@@ -1,0 +1,3 @@
+West_Wall previous=WallMaterial1 (UnityEngine.Material)
+East_Wall previous=WallMaterial2 (UnityEngine.Material)
+Restored both side walls: course tile+normal, tiling 8/4, URP Lit normal keyword enabled. Saved.

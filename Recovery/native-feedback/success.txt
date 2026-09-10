@@ -1,0 +1,1 @@
+Saved current active scene. Buttons=10. switchMode target=Input Manager. Native ParticleSystem.Play and AudioSource.Play bound; no runtime button generation.

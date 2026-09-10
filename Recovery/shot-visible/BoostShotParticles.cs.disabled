@@ -1,0 +1,18 @@
+using System;using System.IO;using System.Linq;using UnityEngine;using UnityEngine.SceneManagement;using UnityEditor;using UnityEditor.SceneManagement;
+public static class BoostShotParticles{
+ const string D="Recovery/shot-visible/";
+ [InitializeOnLoadMethod]static void Init(){if(File.Exists(D+"request"))EditorApplication.delayCall+=Run;}
+ static void Run(){if(EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode){EditorApplication.delayCall+=Run;return;}if(!File.Exists(D+"request"))return;File.Move(D+"request",D+"running");try{
+ var s=SceneManager.GetActiveScene();if(s.path!="Assets/TheRoom/Scenes/TheRoom.unity")throw new Exception("Unexpected scene");
+ var g=s.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<GenerateBullet>(true)).Single(x=>x.initPos!=null&&x.bulletPrefab!=null);var ps=g.shotParticles;if(ps==null)throw new Exception("Missing shot particles");
+ if(!EditorSceneManager.SaveScene(s,D+"LiveBefore.unity",true))throw new Exception("Backup failed");
+ ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+ var m=ps.main;m.loop=false;m.playOnAwake=false;m.duration=.45f;m.startLifetime=new ParticleSystem.MinMaxCurve(.3f,.45f);m.startSize=new ParticleSystem.MinMaxCurve(.055f,.095f);m.startSpeed=new ParticleSystem.MinMaxCurve(.8f,1.4f);m.startColor=new Color(.55f,.9f,1f,1f);m.maxParticles=64;m.simulationSpace=ParticleSystemSimulationSpace.World;
+ var e=ps.emission;e.enabled=true;e.rateOverTime=0;e.SetBursts(new[]{new ParticleSystem.Burst(0,24)});
+ var shape=ps.shape;shape.enabled=true;shape.shapeType=ParticleSystemShapeType.Cone;shape.angle=28;shape.radius=.045f;
+ var col=ps.colorOverLifetime;col.enabled=true;var gradient=new Gradient();gradient.SetKeys(new[]{new GradientColorKey(Color.white,0),new GradientColorKey(new Color(.15f,.6f,1f),1)},new[]{new GradientAlphaKey(1,0),new GradientAlphaKey(1,.25f),new GradientAlphaKey(0,1)});col.color=gradient;
+ var size=ps.sizeOverLifetime;size.enabled=true;size.size=new ParticleSystem.MinMaxCurve(1,AnimationCurve.Linear(0,1,1,.15f));
+ ps.Simulate(.08f,true,true);int count=ps.particleCount;if(count<20)throw new Exception("Burst verification failed: "+count);ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+ EditorUtility.SetDirty(ps);PrefabUtility.RecordPrefabInstancePropertyModifications(ps);EditorSceneManager.MarkSceneDirty(s);if(!EditorSceneManager.SaveScene(s))throw new Exception("Save failed");File.WriteAllText(D+"success.txt","24 particles/burst; size .055-.095; lifetime .3-.45; speed .8-1.4; cone 28 degrees. Simulation count="+count+". Saved.");
+ }catch(Exception ex){File.WriteAllText(D+"error.txt",ex.ToString());}}
+}
